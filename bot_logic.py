@@ -11,7 +11,8 @@ class Bot:
         self.victory_condition = win
         self.name = "-".join((symb, "bot"))
 
-    def check_line(self, playground, pos, direction, current_symbol_count=1):
+    def check_direction(self, playground, pos, direction,
+                        current_symbol_count=1):
         new_pos = list(map(lambda x, y: x + y, pos, direction))
         if new_pos[0] < 0 or new_pos[0] >= playground.height or \
                 new_pos[1] < 0 or new_pos[1] >= playground.width or \
@@ -19,41 +20,43 @@ class Bot:
             return current_symbol_count
         else:
             new_symbol_count = \
-                self.check_line(playground, new_pos, direction,
-                                current_symbol_count=current_symbol_count + 1)
+                self.check_direction(playground, new_pos, direction,
+                                     current_symbol_count=current_symbol_count +
+                                                          1)
         return new_symbol_count
 
-    def game_end_condition_check(self, playground, point):
+    def check_lines(self, playground, point):
         left_right_way = [(0, -1), (0, 1)]
         up_down_way = [(-1, 0), (1, 0)]
         main_diagonal_way = [(-1, -1), (1, 1)]
         secondary_diagonal_way = [(1, -1), (-1, 1)]
         all_lines = []
 
-        left_signs = self.check_line(playground, point, left_right_way[0])
-        right_signs = self.check_line(playground, point, left_right_way[1])
+        left_signs = self.check_direction(playground, point, left_right_way[0])
+        right_signs = self.check_direction(playground, point, left_right_way[1])
         all_lines.append(left_signs + right_signs - 1)
 
-        up_signs = self.check_line(playground, point, up_down_way[0])
-        down_signs = self.check_line(playground, point, up_down_way[1])
+        up_signs = self.check_direction(playground, point, up_down_way[0])
+        down_signs = self.check_direction(playground, point, up_down_way[1])
         all_lines.append(up_signs + down_signs - 1)
 
-        main_diagonal_left_part = self.check_line(playground, point,
-                                                  main_diagonal_way[0])
-        main_diagonal_right_part = self.check_line(playground, point,
-                                                   main_diagonal_way[1])
+        main_diagonal_left_part = self.check_direction(playground, point,
+                                                       main_diagonal_way[0])
+        main_diagonal_right_part = self.check_direction(playground, point,
+                                                        main_diagonal_way[1])
         all_lines.append(main_diagonal_left_part + main_diagonal_right_part - 1)
 
-        secondary_diagonal_left_part = self.check_line(playground, point,
-                                                       secondary_diagonal_way[
-                                                           0])
-        secondary_diagonal_right_part = self.check_line(playground, point,
-                                                        secondary_diagonal_way[
-                                                            1])
+        secondary_diagonal_left_part = \
+            self.check_direction(playground, point, secondary_diagonal_way[0])
+        secondary_diagonal_right_part = \
+            self.check_direction(playground, point, secondary_diagonal_way[1])
         all_lines.append(secondary_diagonal_left_part + \
                          secondary_diagonal_right_part - 1)
 
         self.biggest_row = max(max(all_lines), self.biggest_row)
+
+    def game_end_condition_check(self, playground, point):
+        self.check_lines(playground, point)
         if self.victory_condition <= self.biggest_row:
             print(self.name, "wins")
             return False
